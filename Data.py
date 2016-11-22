@@ -1,0 +1,16 @@
+"""
+Load Fasta Inputs and Test Cases Samples
+"""
+#ΔG = -54.70 kcal/mol
+
+seq1="ACUUCGCAAGCACGCGUAGGGAAAGGCACCAUGUAUCACGAUAUUACAUACUAAGAGCGU\
+CAACGUGAAUACCUGCUGGAUACUGUGUGGGCCGUGGUGAAAGUUUGAUCCGCAAAGCAG\
+CCCCUGUAACUGUACUCGCGGCAAGAGCAUCGCAGCAGUAUGUGCGUCUGAAUGCGACAC\
+GGAAGGCACGGCGGGACCCA"
+
+def Data(object):
+    def __init__(self,source):
+        self.source = source
+
+    def getSequence(self):
+        return seq1
