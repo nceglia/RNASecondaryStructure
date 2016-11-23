@@ -19,8 +19,10 @@ class GeneticAlgorithm(object):
         self.currentGeneration = 0
         self.bestScore = sys.maxfloat
         self.avgScore =sys.maxfloat
+        self.oldScore = sys.maxfloat
         self.avgChange = avgChange
-
+        count = 0
+        
     def initialPopulation(self):
         self.population = [self.randomChromosome(self.domain) for _ in xrange(self.popSize)]
 
@@ -29,10 +31,12 @@ class GeneticAlgorithm(object):
         return string
 
     def stop(self):
-        """
-        PLEASE REWRITE TO USE AVERAGE CHANGE OVER SOME ITERATION
-        """
         stopping = False
+        if self.avgScore < self.oldScore:
+            count += 1
+        if count == 5:
+            stopping = True
+            self.oldScore = self.avgScore
         if self.currentGeneration > maxIter:
             stopping = True
             logging.info("Maximum Iterations Reached!")
