@@ -32,7 +32,7 @@ class GeneticAlgorithm(object):
 
     def stop(self):
         stopping = False
-        if self.avgScore < self.oldScore:
+        if self.avgScore - self.oldScore < self.avgChange:
             count += 1
         if count == 5:
             stopping = True
@@ -48,7 +48,7 @@ class GeneticAlgorithm(object):
             scores.append(self.fitness(chrom))
         return scores
 
-    def probability(self,scores)
+    def probability(self,scores):
         tmp = numpy.max(scores)
         scores -= tmp
         scores = numpy.exp(scores)
@@ -111,7 +111,7 @@ class GeneticAlgorithm(object):
 
 def main():
     logger.info("**PREDICTING RNA SECONDARY STRUCTURE**")
-    testSeq = Data.getSequence()
+    testSeq = Data(seq1).getSequence()
     testDomain = StructureDomain(testSeq)
     algorithm = GeneticAlgorithm(testDomain,GibbsFreeEnergy)
     algorithm.run()
