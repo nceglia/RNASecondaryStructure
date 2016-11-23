@@ -32,7 +32,7 @@ class GeneticAlgorithm(object):
 
     def stop(self):
         stopping = False
-        if self.avgScore < self.oldScore:
+        if self.avgScore - self.oldScore < self.avgChange:
             count += 1
         if count == 5:
             stopping = True
