@@ -4,7 +4,7 @@ Main Algorithm Class
 from RNA import StructureDomain,GibbsFreeEnergy
 from Data import Data
 import random
-import logger
+import logging
 import numpy
 import sys
 
@@ -17,46 +17,50 @@ class GeneticAlgorithm(object):
         self.domain = domain
         self.maxIter = maxIter
         self.currentGeneration = 0
-        self.bestScore = sys.maxfloat
-        self.avgScore =sys.maxfloat
-        self.oldScore = sys.maxfloat
+        self.bestScore = sys.float_info.max
+        self.avgScore =sys.sys.float_info.max
+        self.oldScore = sys.sys.float_info.max
         self.avgChange = avgChange
-        count = 0
+        self.count = 0
+        self.prob = []
+        self.scores = []
         
     def initialPopulation(self):
-        self.population = [self.randomChromosome(self.domain) for _ in xrange(self.popSize)]
-
+        self.population = []
+        for i in range(self.popSize):
+            self.population.append(self.randomChromosome(self.domain))
     def randomChromosome(self,domain):
-        string = [random.choice(domain) for x in self.domain]
+        string = [random.choice(x) for x in self.domain]
         return string
 
     def stop(self):
         stopping = False
-        if self.avgScore < self.oldScore:
-            count += 1
-        if count == 5:
+        
+        #if self.avgScore - self.oldScore < self.avgChange:
+         #   self.count += 1
+        #if self.count == 5:
+         #   stopping = True
+          #  self.oldScore = self.avgScore
+        #if self.currentGeneration > self.maxIter:
+         #   stopping = True
+          #  logging.info("Maximum Iterations Reached!")
+        if (self.bestScore == 0):
             stopping = True
-            self.oldScore = self.avgScore
-        if self.currentGeneration > maxIter:
-            stopping = True
-            logging.info("Maximum Iterations Reached!")
         return stopping
 
     def scoreFitness(self):
         scores = []
         for chrom in self.population:
             scores.append(self.fitness(chrom))
+        self.scores = scores
         return scores
 
     def probability(self,scores)
-        tmp = numpy.max(scores)
-        scores -= tmp
-        scores = numpy.exp(scores)
-        tmp = numpy.sum(scores)
-        scores /= tmp
-        scores = 1.0 - scores
-        return scores
-
+        npa = numpy.array
+        e = numpy.exp(-npa(scores) / 1.0)
+        dist = e / numpy.sum(e)
+        return dist
+    
     def mutate(self,string):
         mutatedString = []
         for loc in string:
@@ -67,7 +71,7 @@ class GeneticAlgorithm(object):
         return mutatedString
 
     def splice(self,parentA,parentB,points=1):
-        splicedString = []
+        splicedString = [None] * len(self.domain)
         for _ in xrange(points):
             splicePoint = random.randint(0, len(self.domain))
             for index in xrange(0,splicePoint):
@@ -78,29 +82,33 @@ class GeneticAlgorithm(object):
 
     def evaluate(self):
         scores = self.scoreFitness()
-        probability = self.probability(scores)
+        self.prob = self.probability(scores)
         minScore = min(scores)
         if minScore <= self.bestScore:
             self.bestScore = minScore
             self.fittestChild = self.population[numpy.argmin(scores)]
-        self.avgScore = mean(scores)
-        logger.info("Current Minimum: {0}, Average Score {1}".format(self.bestScore,self.avgScore))
+        self.avgScore = numpy.mean(scores)
+        logging.info("Current Minimum: {0}, Average Score {1}".format(self.bestScore,self.avgScore))
 
     def nextGeneration(self):
-        logger.info("Crossing Over and Mutated Generation {0}".format(self.currentGeneration))
+        logging.info("Crossing Over and Mutated Generation {0}".format(self.currentGeneration))
         nextPop = []
         for _ in self.popSize:
-            parentA, parentB = numpy.random.choice(nextPop, 2, p=prob)
+            plength = len(self.population)
+            index = list(range(plength))
+            Aindex, Bindex = numpy.random.choice(index, 2, replace = False, p=self.prob)
+            parentA = self.population[Aindex]
+            parentB = self.population[Bindex]
             if random.uniform(0.0, 1.0) <= self.crossover:
                 child = self.splice(parentA, parentB,points=1)
             else:
-                random.choice([parentA,parentB])
+                child = random.choice([parentA,parentB])
             nextPop.append(self.mutate(child))
         self.currentGeneration += 1
         self.population = nextPop
 
     def run(self):
-        logger.info("Initializing Population...")
+        logging.info("Initializing Population...")
         self.initialPopulation()
         self.evaluate()
         while not self.stop():
@@ -110,13 +118,12 @@ class GeneticAlgorithm(object):
 
 
 def main():
-    logger.info("**PREDICTING RNA SECONDARY STRUCTURE**")
-    testSeq = Data.getSequence()
+    logging.info("**PREDICTING RNA SECONDARY STRUCTURE**")
+    testSeq = Data(testSq).getSequence()
     testDomain = StructureDomain(testSeq)
-    algorithm = GeneticAlgorithm(testDomain,GibbsFreeEnergy)
+    algorithm = GeneticAlgorithm(testDomain,TestCost)
     algorithm.run()
-    logger.info("Optimization Complete!")
-    #print(testSeq.structure)
+    logging.info("Optimization Complete!")
 
 if __name__ == '__main__':
     main()
