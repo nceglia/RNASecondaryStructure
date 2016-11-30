@@ -1,19 +1,17 @@
 
-# coding: utf-8
-
-# In[1]:
-
 import random
 import numpy
 import sys
 import logging
-testSq = [random.randint(0, 5) for i in range(50)]
+testSq = [random.randint(0, 10) for i in range(100)]
+
 class Data(object):
     def __init__(self,source):
         self.source = source
 
     def getSequence(self):
         return testSq
+
 def StructureDomain(sequence):
     """
     Will Add Structure Dependent Constraints
@@ -22,7 +20,7 @@ def StructureDomain(sequence):
     2 = Interior Loop
     3 = K-Multiloop
     """
-    return [xrange(5) for _ in xrange(50)]
+    return [range(10) for _ in range(100)]
 
 def TestCost(graph):
     cost = 0
@@ -32,10 +30,10 @@ def TestCost(graph):
             cost = cost + 1
         prev = i
     return cost
-   
 
 
-# In[119]:
+
+
 
 
 class GeneticAlgorithm(object):
@@ -53,18 +51,20 @@ class GeneticAlgorithm(object):
         self.avgChange = avgChange
         self.count = 0
         self.prob = []
+        self.scores = []
 
     def initialPopulation(self):
         self.population = []
-        for i in xrange(popSize):
+        for i in range(self.popSize):
             self.population.append(self.randomChromosome(self.domain))
 
     def randomChromosome(self,domain):
-        string = [random.choice(self.domain[i]) for x in self.domain]
+        string = [random.choice(x) for x in self.domain]
         return string
 
     def stop(self):
         stopping = False
+        '''
         if self.avgScore - self.oldScore < self.avgChange:
             self.count += 1
         if self.count == 5:
@@ -73,22 +73,24 @@ class GeneticAlgorithm(object):
         if self.currentGeneration > self.maxIter:
             stopping = True
             logging.info("Maximum Iterations Reached!")
+        '''
+        if (self.bestScore == 0):
+            stopping = True
+
         return stopping
 
     def scoreFitness(self):
         scores = []
         for chrom in self.population:
             scores.append(self.fitness(chrom))
+        self.scores = scores
         return scores
 
     def probability(self,scores):
-        tmp = numpy.max(scores)
-        scores -= tmp
-        scores = numpy.exp(scores)
-        tmp = numpy.sum(scores)
-        scores /= tmp
-        scores = 1.0 - scores
-        return scores
+        npa = numpy.array
+        e = numpy.exp(-npa(scores) / 1.0)
+        dist = e / numpy.sum(e)
+        return dist
 
     def mutate(self,string):
         mutatedString = []
@@ -101,17 +103,18 @@ class GeneticAlgorithm(object):
 
     def splice(self,parentA,parentB,points=1):
         splicedString = [None] * len(self.domain)
-        for _ in xrange(points):
+        for _ in range(points):
             splicePoint = random.randint(0, len(self.domain))
-            for index in xrange(0,splicePoint):
+            for index in range(0,splicePoint):
                 splicedString[index] = parentA[index]
-            for index in xrange(splicePoint,len(self.domain)):
+            for index in range(splicePoint,len(self.domain)):
                 splicedString[index] = parentB[index]
         return splicedString
 
     def evaluate(self):
         scores = self.scoreFitness()
         self.prob = self.probability(scores)
+        #print(numpy.sum(self.prob))
         minScore = min(scores)
         if minScore <= self.bestScore:
             self.bestScore = minScore
@@ -125,7 +128,7 @@ class GeneticAlgorithm(object):
         for _ in range(self.popSize):
             plength = len(self.population)
             index = list(range(plength))
-            Aindex, Bindex = numpy.random.choice(index, 2, replace = False)
+            Aindex, Bindex = numpy.random.choice(index, 2, replace = False, p=self.prob)
             parentA = self.population[Aindex]
             parentB = self.population[Bindex]
             if random.uniform(0.0, 1.0) <= self.crossover:
@@ -143,6 +146,8 @@ class GeneticAlgorithm(object):
         while not self.stop():
             self.nextGeneration()
             self.evaluate()
+        print(self.fittestChild)
+        print(self.bestScore)
         return self.bestScore, self.fittestChild
 
 
@@ -153,17 +158,11 @@ def main():
     algorithm = GeneticAlgorithm(testDomain,TestCost)
     algorithm.run()
     logging.info("Optimization Complete!")
-    #print(testSeq.structure)
 
 
-
-
-# In[121]:
 
 a = main()
 
-
-# In[ ]:
 
 
 
