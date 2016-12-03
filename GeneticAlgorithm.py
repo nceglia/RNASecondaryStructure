@@ -1,15 +1,15 @@
 """
 Main Algorithm Class
 """
-from RNA import StructureDomain,GibbsFreeEnergy
-from Data import Data
+from RNA import StructureDomain,CostStructure
+from Data import *
 import random
 import logging
 import numpy
 import sys
 
 class GeneticAlgorithm(object):
-    def __init__(self,domain,fitness,crossover=0.7,mutation=0.01,popSize=1000,maxIter=100,avgChange=None):
+    def __init__(self,domain,fitness,crossover=0.7,mutation=0.01,popSize=25,maxIter=100,avgChange=None):
         self.mutation = mutation
         self.crossover = crossover
         self.popSize = popSize
@@ -18,82 +18,92 @@ class GeneticAlgorithm(object):
         self.maxIter = maxIter
         self.currentGeneration = 0
         self.bestScore = sys.float_info.max
-        self.avgScore =sys.sys.float_info.max
-        self.oldScore = sys.sys.float_info.max
+        self.avgScore = sys.float_info.max
+        self.oldScore = sys.float_info.max
         self.avgChange = avgChange
         self.count = 0
         self.prob = []
         self.scores = []
-        
+
     def initialPopulation(self):
         self.population = []
         for i in range(self.popSize):
             self.population.append(self.randomChromosome(self.domain))
     def randomChromosome(self,domain):
-        string = [random.choice(x) for x in self.domain]
+        string = []
+        for line in self.domain:
+            string.append([random.choice(x) for x in line])
         return string
 
     def stop(self):
         stopping = False
-        
+
         #if self.avgScore - self.oldScore < self.avgChange:
          #   self.count += 1
         #if self.count == 5:
          #   stopping = True
           #  self.oldScore = self.avgScore
-        #if self.currentGeneration > self.maxIter:
-         #   stopping = True
-          #  logging.info("Maximum Iterations Reached!")
-        if (self.bestScore == 0):
-            stopping = True
+        if self.currentGeneration > self.maxIter:
+           stopping = True
+           print("Maximum Iterations Reached!")
+        # if (self.bestScore == 0):
+        #     stopping = True
         return stopping
 
     def scoreFitness(self):
         scores = []
-        for chrom in self.population:
+        print "In Score Fitness.."
+        for i, chrom in enumerate(self.population):
             scores.append(self.fitness(chrom))
         self.scores = scores
         return scores
 
-    def probability(self,scores)
+    def probability(self,scores):
         npa = numpy.array
         e = numpy.exp(-npa(scores) / 1.0)
         dist = e / numpy.sum(e)
         return dist
-    
+
     def mutate(self,string):
-        mutatedString = []
-        for loc in string:
-            if random.uniform(0.0, 1.0) <= self.mutation:
-                 mutatedString.append(random.choice(self.domain[i]))
-            else:
-                mutatedString.append(loc)
+        dim = numpy.array(string).shape
+        mutatedString = numpy.empty(dim)
+        for i in xrange(len(string)):
+            for j in xrange(len(string[i])):
+                if random.uniform(0.0, 1.0) <= self.mutation:
+                 mutatedString[i][j] = random.choice(self.domain[i][j])
+                else:
+                    mutatedString[i][j] = string[i][j]
         return mutatedString
 
     def splice(self,parentA,parentB,points=1):
-        splicedString = [None] * len(self.domain)
+        dimBefore = numpy.array(parentA).shape
+        flattenedA = numpy.array(parentA).flatten()
+        flattenedB = numpy.array(parentB).flatten()
+        splicedString = [None] * len(flattenedA)
         for _ in xrange(points):
-            splicePoint = random.randint(0, len(self.domain))
+            splicePoint = random.randint(0, len(flattenedA))
             for index in xrange(0,splicePoint):
-                splicedString[index] = parentA[index]
+                splicedString[index] = flattenedA[index]
             for index in xrange(splicePoint,len(self.domain)):
-                splicedString[index] = parentB[index]
-        return splicedString
+                splicedString[index] = flattenedB[index]
+        return numpy.array(splicedString).reshape(dimBefore)
 
     def evaluate(self):
+        print "Scoring Fitness..."
         scores = self.scoreFitness()
+        print "Scoring Probability"
         self.prob = self.probability(scores)
         minScore = min(scores)
         if minScore <= self.bestScore:
             self.bestScore = minScore
             self.fittestChild = self.population[numpy.argmin(scores)]
         self.avgScore = numpy.mean(scores)
-        logging.info("Current Minimum: {0}, Average Score {1}".format(self.bestScore,self.avgScore))
+        print("Current Minimum: {0}, Average Score {1}".format(self.bestScore,self.avgScore))
 
     def nextGeneration(self):
-        logging.info("Crossing Over and Mutated Generation {0}".format(self.currentGeneration))
+        print("Crossing Over and Mutated Generation {0}".format(self.currentGeneration))
         nextPop = []
-        for _ in self.popSize:
+        for _ in xrange(self.popSize):
             plength = len(self.population)
             index = list(range(plength))
             Aindex, Bindex = numpy.random.choice(index, 2, replace = False, p=self.prob)
@@ -108,8 +118,9 @@ class GeneticAlgorithm(object):
         self.population = nextPop
 
     def run(self):
-        logging.info("Initializing Population...")
+        print("Initializing Population...")
         self.initialPopulation()
+        print("Evaluating Initial Population..")
         self.evaluate()
         while not self.stop():
             self.nextGeneration()
@@ -118,12 +129,12 @@ class GeneticAlgorithm(object):
 
 
 def main():
-    logging.info("**PREDICTING RNA SECONDARY STRUCTURE**")
-    testSeq = Data(testSq).getSequence()
-    testDomain = StructureDomain(testSeq)
-    algorithm = GeneticAlgorithm(testDomain,TestCost)
+    print("**PREDICTING RNA SECONDARY STRUCTURE**")
+    # testSeq = Data.Data(seq1).getSequence()
+    testDomain = StructureDomain(seq1)
+    algorithm = GeneticAlgorithm(StructureDomain(seq1),lambda x: -1.0*CostStructure(x))
     algorithm.run()
-    logging.info("Optimization Complete!")
+    print("Optimization Complete!")
 
 if __name__ == '__main__':
     main()
