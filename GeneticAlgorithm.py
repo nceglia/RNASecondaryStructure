@@ -2,14 +2,16 @@
 Main Algorithm Class
 """
 from RNA import StructureDomain,CostStructure
-from Data import *
+import Data
 import random
 import logging
 import numpy
 import sys
+import math
+import time
 
 class GeneticAlgorithm(object):
-    def __init__(self,domain,fitness,crossover=0.7,mutation=0.01,popSize=25,maxIter=100,avgChange=None):
+    def __init__(self,domain,fitness,crossover=0.7,mutation=0.01,popSize=100,maxIter=80,avgChange=None):
         self.mutation = mutation
         self.crossover = crossover
         self.popSize = popSize
@@ -37,30 +39,21 @@ class GeneticAlgorithm(object):
 
     def stop(self):
         stopping = False
-
-        #if self.avgScore - self.oldScore < self.avgChange:
-         #   self.count += 1
-        #if self.count == 5:
-         #   stopping = True
-          #  self.oldScore = self.avgScore
         if self.currentGeneration > self.maxIter:
            stopping = True
            print("Maximum Iterations Reached!")
-        # if (self.bestScore == 0):
-        #     stopping = True
         return stopping
 
     def scoreFitness(self):
         scores = []
-        print "In Score Fitness.."
         for i, chrom in enumerate(self.population):
             scores.append(self.fitness(chrom))
         self.scores = scores
         return scores
 
     def probability(self,scores):
-        npa = numpy.array
-        e = numpy.exp(-npa(scores) / 1.0)
+        norm = [1.0/(max(scores)-min(scores))*(float(x)-max(scores))+1.0 for x in scores]
+        e = numpy.exp(-numpy.array(norm) / 1.0)
         dist = e / numpy.sum(e)
         return dist
 
@@ -75,33 +68,30 @@ class GeneticAlgorithm(object):
                     mutatedString[i][j] = string[i][j]
         return mutatedString
 
-    def splice(self,parentA,parentB,points=1):
+    def splice(self,parentA,parentB):
         dimBefore = numpy.array(parentA).shape
         flattenedA = numpy.array(parentA).flatten()
         flattenedB = numpy.array(parentB).flatten()
         splicedString = [None] * len(flattenedA)
-        for _ in xrange(points):
-            splicePoint = random.randint(0, len(flattenedA))
-            for index in xrange(0,splicePoint):
-                splicedString[index] = flattenedA[index]
-            for index in xrange(splicePoint,len(self.domain)):
-                splicedString[index] = flattenedB[index]
-        return numpy.array(splicedString).reshape(dimBefore)
+        splicePoint = random.randint(0, len(flattenedA))
+        for index in xrange(0,splicePoint):
+            splicedString[index] = flattenedA[index]
+        for index in xrange(splicePoint,len(flattenedA)):
+            splicedString[index] = flattenedB[index]
+        splicedString = numpy.array(splicedString).reshape(dimBefore)
+        return splicedString
 
     def evaluate(self):
-        print "Scoring Fitness..."
         scores = self.scoreFitness()
-        print "Scoring Probability"
         self.prob = self.probability(scores)
         minScore = min(scores)
         if minScore <= self.bestScore:
             self.bestScore = minScore
             self.fittestChild = self.population[numpy.argmin(scores)]
         self.avgScore = numpy.mean(scores)
-        print("Current Minimum: {0}, Average Score {1}".format(self.bestScore,self.avgScore))
+        print "Current Minimum: {0}, Average Score {1}".format(self.bestScore,self.avgScore),
 
     def nextGeneration(self):
-        print("Crossing Over and Mutated Generation {0}".format(self.currentGeneration))
         nextPop = []
         for _ in xrange(self.popSize):
             plength = len(self.population)
@@ -110,7 +100,7 @@ class GeneticAlgorithm(object):
             parentA = self.population[Aindex]
             parentB = self.population[Bindex]
             if random.uniform(0.0, 1.0) <= self.crossover:
-                child = self.splice(parentA, parentB,points=1)
+                child = self.splice(parentA, parentB)
             else:
                 child = random.choice([parentA,parentB])
             nextPop.append(self.mutate(child))
@@ -119,22 +109,26 @@ class GeneticAlgorithm(object):
 
     def run(self):
         print("Initializing Population...")
+        start_time = time.time()
         self.initialPopulation()
-        print("Evaluating Initial Population..")
         self.evaluate()
+        print "\t\tElapsed Time: ",time.time() - start_time, "Seconds"
         while not self.stop():
+            start_time = time.time()
             self.nextGeneration()
             self.evaluate()
+            print "\t\tElapsed Time: ",time.time() - start_time, "Seconds"
         return self.bestScore, self.fittestChild
 
 
 def main():
     print("**PREDICTING RNA SECONDARY STRUCTURE**")
-    # testSeq = Data.Data(seq1).getSequence()
-    testDomain = StructureDomain(seq1)
-    algorithm = GeneticAlgorithm(StructureDomain(seq1),lambda x: -1.0*CostStructure(x))
-    algorithm.run()
+    data = Data.Data("test1.txt")
+    seq = data.getSequence()
+    #testDomain = StructureDomain(seq1)
+    algorithm = GeneticAlgorithm(StructureDomain(seq),lambda x: -1.0*CostStructure(x))
+    bestScore, structure = algorithm.run()
     print("Optimization Complete!")
-
+    data.testStructure(structure)
 if __name__ == '__main__':
     main()

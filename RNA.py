@@ -2,6 +2,7 @@
 Classes:
 Defining Secondary Structure Configuration
 """
+import numpy
 def TestStructureDomain(sequence):
     return [range(10) for _ in range(100)]
 
@@ -28,29 +29,41 @@ def stack(structure,weightFunc = lambda x: x-1):
     return stackWeight
 
 def StructureDomain(sequence):
-    domain = []
+    domain = numpy.empty((len(sequence),len(sequence),2))
     for i in xrange(len(sequence)):
-        domain.append([])
         for j in xrange(len(sequence)):
             if i == j:
-                domain[i].append([0])
-            elif sequence[i]==sequence[j]:
-                domain[i].append([0])
+                domain[i][j][0] = 0
+                domain[i][j][1] = 0
+            elif (sequence[i]=='A' and sequence[j]=='U') or (sequence[i]=='U' and sequence[j]=='A'):
+                domain[i][j][0] = 0
+                domain[i][j][1] = 1
+            elif (sequence[i]=='G' and sequence[j]=='C') or (sequence[i]=='C' and sequence[j]=='G'):
+                domain[i][j][0] = 0
+                domain[i][j][1] = 1
             else:
-                domain[i].append([0,1])
+                domain[i][j][0] = 0
+                domain[i][j][1] = 0
     return domain
 
-def CostStructure(structure):
+def CostStructure(structure,weight=6.0):
     cost =0
+    # How many base pairs
+    basepairs = 0
+    for row in structure:
+        for item in row:
+            if item==1.0:
+                basepairs+=1
+    cost = basepairs
+    penalty = 0
     for i in xrange(len(structure)):
         count = 0
         for j in xrange(len(structure[i])):
-            count += structure[i][j]
-        if count < 2:
-            cost += count
-        else:
-            cost += (1-count)
-    return cost + stack(structure)
+            if structure[i][j] == 1.0:
+                count += 1
+        if count > 1:
+            penalty += weight * count
+    return cost - penalty + stack(structure)
 
 def TestCost(graph):
     cost = 0
