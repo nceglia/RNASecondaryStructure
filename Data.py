@@ -21,7 +21,8 @@ class Data(object):
     def getSequence(self):
         return self.sequence
 
-    def testStructure(self,structure):
+    @staticmethod
+    def pairing(structure):
         result = []
         for i in xrange(len(structure)):
             for j in xrange(len(structure)):
@@ -31,11 +32,15 @@ class Data(object):
         for i,res in enumerate(result):
             if res[0] > res[1]:
                 result[i] = (res[1],res[0])
-        result = list(set(result))
-        print "Returned Pairs: ", " ".join(map(str,result))
+        results = list(set(result))
+        return results
+
+    def testStructure(self,structure):
+        results = self.pairing(structure)
+        print "Returned Pairs: ", " ".join(map(str,results))
         for i, solution in enumerate(self.solutions):
             hits = 0
-            for pair in result:
+            for pair in results:
                 if pair in solution:
                     hits+=1
             print "{0}% Matched with Solution {1}".format(float(hits)/len(solution)*100.0,i)

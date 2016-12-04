@@ -3,6 +3,8 @@ Classes:
 Defining Secondary Structure Configuration
 """
 import numpy
+from Data import Data
+
 def TestStructureDomain(sequence):
     return [range(10) for _ in range(100)]
 
@@ -46,24 +48,24 @@ def StructureDomain(sequence):
                 domain[i][j][1] = 0
     return domain
 
-def CostStructure(structure,weight=6.0):
-    cost =0
-    # How many base pairs
+def Penalty(structure):
+    pairs = Data.pairing(structure)
+    bases = list(numpy.array(pairs).flatten())
+    cost = 0
+    for base in list(set(bases)):
+        count = bases.count(base)
+        if count > 1:
+            cost += count
+    return cost
+
+def CostStructure(structure,weight=-10.0):
     basepairs = 0
     for row in structure:
         for item in row:
             if item==1.0:
                 basepairs+=1
-    cost = basepairs
-    penalty = 0
-    for i in xrange(len(structure)):
-        count = 0
-        for j in xrange(len(structure[i])):
-            if structure[i][j] == 1.0:
-                count += 1
-        if count > 1:
-            penalty += weight * count
-    return cost - penalty + stack(structure)
+    penalty = weight *Penalty(structure)
+    return basepairs + penalty + stack(structure)
 
 def TestCost(graph):
     cost = 0
