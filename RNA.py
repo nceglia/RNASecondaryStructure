@@ -5,31 +5,6 @@ Defining Secondary Structure Configuration
 import numpy
 from Data import Data
 
-def TestStructureDomain(sequence):
-    return [range(10) for _ in range(100)]
-
-def stack(structure,weightFunc = lambda x: x-1):
-    stackWeight = 0
-    for i in xrange(len(structure)):
-        for j in reversed(xrange(len(structure))):
-            n = 0
-            z = i
-            p = j
-            if structure[i][j] == 1:
-                n = 1
-            while True:
-                if z+1 >= len(structure) or p-1 < 0:
-                    break
-                elif structure[z+1][p-1] != 1:
-                    break
-                else:
-                    n += 1
-                z += 1
-                p -= 1
-            if n > 0:
-                stackWeight += weightFunc(n)
-    return stackWeight
-
 def StructureDomain(sequence):
     domain = numpy.empty((len(sequence),len(sequence),2))
     for i in xrange(len(sequence)):
@@ -58,21 +33,12 @@ def Penalty(structure):
             cost += count
     return cost
 
-def CostStructure(structure,weight=-10.0):
+def CostStructure(structure,weight=-50.0):
     basepairs = 0
     for row in structure:
         for item in row:
             if item==1.0:
                 basepairs+=1
     penalty = weight *Penalty(structure)
-    return basepairs + penalty + stack(structure)
-
-def TestCost(graph):
-    cost = 0
-    prev = graph[0]
-    for i in graph[1:]:
-        if (prev == i):
-            cost = cost + 1
-        prev = i
-    return cost
+    return basepairs + penalty
 

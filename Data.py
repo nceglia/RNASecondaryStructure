@@ -1,5 +1,5 @@
 """
-Load Fasta Inputs and Test Cases Samples
+Load Sequences and Test Cases Samples
 """
 import random
 import numpy
@@ -7,20 +7,20 @@ import subprocess
 import os
 import time
 from subprocess import Popen, PIPE, STDOUT
-# seq1="ACUUCGCAAGCACGCGUAGGGAAAGGCACCAUGUAUCACGAUAUUACAUACUAAGAGCGU\
-# CAACGUGAAUACCUGCUGGAUACUGUGUGGGCCGUGGUGAAAGUUUGAUCCGCAAAGCAG\
-# CCCCUGUAACUGUACUCGCGGCAAGAGCAUCGCAGCAGUAUGUGCGUCUGAAUGCGACAC\
-# GGAAGGCACGGCGGGACCCA"
-# seq1 = numpy.array(list(seq1))
-# testSq = [random.randint(0, 10) for i in range(100)]
+import difflib
 
 class Data(object):
-    def __init__(self,ifile):
+    def __init__(self,ifile,testType="pairs"):
         rows = open(ifile,"r").read().splitlines()
         self.sequence = numpy.array(list(rows[0]))
         self.solutions = []
+        self.testType = testType
         for row in rows[1:]:
-            self.solutions.append(eval(row))
+            try:
+                self.solutions.append(eval(row))
+            except SyntaxError:
+                self.solutions.append(row)
+                self.testType = "dotbracket"
 
     def getSequence(self):
         return self.sequence
@@ -40,16 +40,22 @@ class Data(object):
         return results
 
     def testStructure(self,structure):
-        results = self.pairing(structure)
-        print "Returned Pairs: ", " ".join(map(str,results))
-        for i, solution in enumerate(self.solutions):
-            hits = 0
-            for pair in results:
-                if pair in solution:
-                    hits+=1
-            if hits == len(solution):
-                print "{0}% Matched with Solution {1}".format(float(hits)/len(solution)*100.0,i)
-        return
+        if self.testType == "pairs":
+            results = self.pairing(structure)
+            print "Returned Pairs: ", " ".join(map(str,results))
+            for i, solution in enumerate(self.solutions):
+                hits = 0
+                for pair in results:
+                    if pair in solution:
+                        hits+=1
+                if hits == len(solution):
+                    print "{0}% Matched with Solution {1}".format(float(hits)/len(solution)*100.0,i)
+        elif self.testType == "dotbracket":
+            dotbracket = self.convertDotBracket(structure)
+            print "Returned DotBracket {0}".format(dotbracket)
+            for i, solution in enumerate(self.solutions):
+                perc = difflib.SequenceMatcher(None,dotbracket,str(solution))
+                print "{0}% Matched with Solution {1}".format(float(perc.ratio())*100.0,i)
 
     def convertDotBracket(self,structure):
         dotbracket = ["." for _ in self.sequence]
@@ -64,5 +70,5 @@ class Data(object):
         pipe_data += ">{0}\n".format(prefix)
         pipe_data += "".join(list(self.sequence))+"\n"
         pipe_data += "".join(self.convertDotBracket(structure)) + "\n"
-        p = Popen(['RNAPlot'], stdout=PIPE, stdin=PIPE, stderr=PIPE)
+        p = Popen(['RNAPlot','-t','0'], stdout=PIPE, stdin=PIPE, stderr=PIPE)
         p.communicate(input=pipe_data)
