@@ -9,9 +9,10 @@ import numpy
 import sys
 import math
 import time
+import argparse
 
 class GeneticAlgorithm(object):
-    def __init__(self,domain,fitness,crossover=0.5,mutation=0.1,popSize=50,maxIter=600,maxUnchanged=50,tol=0.00001):
+    def __init__(self,domain,fitness,crossover=0.5,mutation=0.2,popSize=20,maxIter=600,maxUnchanged=25,tol=0.00001):
         self.mutation = mutation
         self.crossover = crossover
         self.popSize = popSize
@@ -150,7 +151,11 @@ class GeneticAlgorithm(object):
         return self.bestScore, self.fittestChild
 
 def main():
-    testcase = sys.argv[1]
+    parser = argparse.ArgumentParser(description='Process some integers.')
+    parser.add_argument('-t', dest='test', type=str, help='Test Case to Run')
+    parser.add_argument('-d', dest='draw',help='Draw structure',action='store_true')
+    args = parser.parse_args()
+    testcase = args.test
     print("**PREDICTING RNA SECONDARY STRUCTURE**")
     data = Data.Data("{0}.txt".format(testcase))
     seq = data.getSequence()
@@ -158,7 +163,8 @@ def main():
     bestScore, structure = algorithm.run()
     print("Optimization Complete!")
     data.testStructure(structure)
-    data.drawDotBracket(structure,"{0}Output".format(testcase.capitalize()))
+    if args.draw:
+        data.drawDotBracket(structure,"{0}Output".format(testcase.capitalize()))
 
 
 if __name__ == '__main__':
