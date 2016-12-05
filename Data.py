@@ -3,6 +3,7 @@ Load Fasta Inputs and Test Cases Samples
 """
 import random
 import numpy
+import subprocess
 # seq1="ACUUCGCAAGCACGCGUAGGGAAAGGCACCAUGUAUCACGAUAUUACAUACUAAGAGCGU\
 # CAACGUGAAUACCUGCUGGAUACUGUGUGGGCCGUGGUGAAAGUUUGAUCCGCAAAGCAG\
 # CCCCUGUAACUGUACUCGCGGCAAGAGCAUCGCAGCAGUAUGUGCGUCUGAAUGCGACAC\
@@ -43,8 +44,22 @@ class Data(object):
             for pair in results:
                 if pair in solution:
                     hits+=1
-            print "{0}% Matched with Solution {1}".format(float(hits)/len(solution)*100.0,i)
+            if hits == len(solution):
+                print "{0}% Matched with Solution {1}".format(float(hits)/len(solution)*100.0,i)
         return
 
+    def convertDotBracket(self,structure):
+        dotbracket = ["." for _ in self.sequence]
+        pairs = self.pairing(structure)
+        for pair in pairs:
+            dotbracket[pair[0]] = "("
+            dotbracket[pair[1]] = ")"
+        return "".join(dotbracket)
 
-
+    def drawDotBracket(self,dotbracket,prefix):
+        output = open("{0}.txt".format(prefix),"w")
+        output.write(">{0}\n".format(prefix))
+        output.write("".join(list(self.sequence))+"\n")
+        output.write(dotbracket+"\n")
+        output.close()
+        subprocess.call(["RNAplot","<","{0}.txt".format(prefix)])

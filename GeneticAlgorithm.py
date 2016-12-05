@@ -11,7 +11,7 @@ import math
 import time
 
 class GeneticAlgorithm(object):
-    def __init__(self,domain,fitness,crossover=0.7,mutation=0.1,popSize=100,maxIter=500,avgChange=None):
+    def __init__(self,domain,fitness,crossover=0.7,mutation=0.1,popSize=50,maxIter=500,avgChange=None):
         self.mutation = mutation
         self.crossover = crossover
         self.popSize = popSize
@@ -123,12 +123,15 @@ class GeneticAlgorithm(object):
 
 def main():
     print("**PREDICTING RNA SECONDARY STRUCTURE**")
-    data = Data.Data("test2.txt")
+    data = Data.Data("test1.txt")
     seq = data.getSequence()
-    #testDomain = StructureDomain(seq1)
     algorithm = GeneticAlgorithm(StructureDomain(seq),lambda x: -1.0*CostStructure(x))
     bestScore, structure = algorithm.run()
     print("Optimization Complete!")
     data.testStructure(structure)
+    dotbracket = data.convertDotBracket(structure)
+    data.drawDotBracket(dotbracket,"Test1Output")
+
+
 if __name__ == '__main__':
     main()
