@@ -4,6 +4,9 @@ Load Fasta Inputs and Test Cases Samples
 import random
 import numpy
 import subprocess
+import os
+import time
+from subprocess import Popen, PIPE, STDOUT
 # seq1="ACUUCGCAAGCACGCGUAGGGAAAGGCACCAUGUAUCACGAUAUUACAUACUAAGAGCGU\
 # CAACGUGAAUACCUGCUGGAUACUGUGUGGGCCGUGGUGAAAGUUUGAUCCGCAAAGCAG\
 # CCCCUGUAACUGUACUCGCGGCAAGAGCAUCGCAGCAGUAUGUGCGUCUGAAUGCGACAC\
@@ -56,10 +59,10 @@ class Data(object):
             dotbracket[pair[1]] = ")"
         return "".join(dotbracket)
 
-    def drawDotBracket(self,dotbracket,prefix):
-        output = open("{0}.txt".format(prefix),"w")
-        output.write(">{0}\n".format(prefix))
-        output.write("".join(list(self.sequence))+"\n")
-        output.write(dotbracket+"\n")
-        output.close()
-        subprocess.call(["RNAplot","<","{0}.txt".format(prefix)])
+    def drawDotBracket(self,structure,prefix):
+        pipe_data = ""
+        pipe_data += ">{0}\n".format(prefix)
+        pipe_data += "".join(list(self.sequence))+"\n"
+        pipe_data += "".join(self.convertDotBracket(structure)) + "\n"
+        p = Popen(['RNAPlot'], stdout=PIPE, stdin=PIPE, stderr=PIPE)
+        p.communicate(input=pipe_data)

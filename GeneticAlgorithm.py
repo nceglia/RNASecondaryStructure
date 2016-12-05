@@ -129,8 +129,7 @@ def main():
     bestScore, structure = algorithm.run()
     print("Optimization Complete!")
     data.testStructure(structure)
-    dotbracket = data.convertDotBracket(structure)
-    data.drawDotBracket(dotbracket,"Test1Output")
+    data.drawDotBracket(structure,"Test1Output")
 
 
 if __name__ == '__main__':
