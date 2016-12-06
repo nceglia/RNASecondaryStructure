@@ -13,6 +13,7 @@ import numpy
 import pylab
 import matplotlib.cm as cm
 from PIL import Image
+import argparse
 
 def sampler(test,mutation=0.1,crossover=0.7):
     _mean = []
@@ -221,19 +222,36 @@ def compare_diagrams(test_image,true_image):
     plt.savefig("comparison.png")
 
 def all_stats():
+    parser = argparse.ArgumentParser(description='Process some integers.')
+    parser.add_argument('--scatter', dest='scatter',help='Mean/Max/Min over Generations',action='store_true')
+    parser.add_argument('--histogram', dest='hist',help='Distribution of scores at intervals',action='store_true')
+    parser.add_argument('--percentage', dest='perc',help='Accuracy vs string size',action='store_true')
+    parser.add_argument('--time', dest='time',help='Average Time vs string size',action='store_true')
+    parser.add_argument('--iterations', dest='iter',help='Iterations vs string size',action='store_true')
+    parser.add_argument('--mutations', dest='mut',help='Vary Mutations',action='store_true')
+    parser.add_argument('--crossovers', dest='cross',help='Vary Crossover',action='store_true')
+    args = parser.parse_args()
     print "Running All Stats - Becareful,this will take forever..."
     tests = ["test6","test7","test4","test5"]
     for test in tests:
-        scatter(test)
-        histogram(test)
-    percentage_bar(tests)
-    time_bar(tests)
-    iter_bar(tests)
-    vary_mutation("test7", [0.01,0.05,0.1,0.15,0.2,0.3,0.4,0.5,0.6,0.7])
-    vary_crossover("test7", [0.2,0.3,0.4,0.5,0.6,0.7,0.8])
-    vary_mutation_perc("test7", [0.01,0.05,0.1,0.15,0.2,0.3,0.4,0.5,0.6,0.7])
-    vary_crossover_perc("test7", [0.2,0.3,0.4,0.5,0.6,0.7,0.8])
-    compare_diagrams("Test5Output_ss.ps","test5_true.png")
+        if args.scatter:
+            scatter(test)
+        if args.hist:
+            histogram(test)
+    if args.percentage:
+        percentage_bar(tests)
+    if args.time:
+        time_bar(tests)
+    if args.iter:
+        iter_bar(tests)
+    if args.mut:
+        vary_mutation("test7", [0.01,0.05,0.1,0.15,0.2,0.3,0.4,0.5,0.6,0.7])
+        vary_mutation_perc("test7", [0.01,0.05,0.1,0.15,0.2,0.3,0.4,0.5,0.6,0.7])
+    if args.cross:
+        vary_crossover("test7", [0.2,0.3,0.4,0.5,0.6,0.7,0.8])
+        vary_crossover_perc("test7", [0.2,0.3,0.4,0.5,0.6,0.7,0.8])
+    if False:
+        compare_diagrams("Test5Output_ss.ps","test5_true.png")
 
 if __name__ == '__main__':
     all_stats()
