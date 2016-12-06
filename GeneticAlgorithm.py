@@ -114,7 +114,7 @@ class GeneticAlgorithm(object):
             self.fittestChild = bestChild
         self.avgScore = numpy.mean(scores)
         print "Generation {2} Current Minimum: {0}, Average Score {1}".format(self.bestScore,self.avgScore,self.currentGeneration),
-        return self.bestScore,self.minScore, self.avgScore, max(scores)
+        return self.bestScore,minScore, self.avgScore, max(scores)
 
     def nextGeneration(self):
         nextPop = []
@@ -156,20 +156,20 @@ class GeneticAlgorithm(object):
             last_best = self.bestScore
         return self.bestScore, self.fittestChild
 
-def runit(test,crossover=0.7,mutation=0.1,iterations=600,unchanged=50,draw=False):
-    testcase = args.test
+def runit(test,crossover=0.7,mutation=0.1,iterations=600,unchanged=20,draw=False):
+    testcase = test
     print("**PREDICTING RNA SECONDARY STRUCTURE**")
     data = Data.Data("{0}.txt".format(testcase))
     seq = data.getSequence()
     algorithm = GeneticAlgorithm(StructureDomain(seq),
                                  lambda x: -1.0*CostStructure(x),
-                                 crossover=args.crossover,
-                                 mutation=args.mutation,
-                                 maxIter=args.iterations,
-                                 maxUnchanged=args.unchanged)
+                                 crossover=crossover,
+                                 mutation=mutation,
+                                 maxIter=iterations,
+                                 maxUnchanged=unchanged)
     bestScore, structure = algorithm.run()
     run_times = algorithm.run_times
-    score_watch = algorith.score_watch
+    score_watch = algorithm.score_watch
     print("Optimization Complete!")
     best_perc = data.testStructure(structure)
     if draw:
