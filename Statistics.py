@@ -65,7 +65,26 @@ def histogram(test):
     plt.tight_layout()
     plt.savefig("histogram_{0}.png".format(test))
 
-def vary_mutation(test,mutations,runs=3):
+def vary_mutation(test,mutations,runs=3,width=.35):
+    means = []
+    errors = []
+    fig, ax = plt.subplots()
+    for mutation in mutations:
+        avg_perc = []
+        for run in range(runs):
+            _times, _mean, _max, _min, _best, _scores, best_perc = sampler(test,mutation=mutation)
+            avg_perc.append(len(_times))
+        means.append(numpy.mean(avg_perc))
+        errors.append(numpy.std(avg_perc))
+    plt.bar(range(len(mutations)),means, width, color='r', yerr=errors)
+    ax.set_title("Convergence vs. Mutation Rate ({0})".format(test.upper()))
+    ax.set_xticks(range(len(mutations)))
+    ax.set_xticklabels(mutations)
+    ax.set_ylabel("Iterations")
+    ax.set_xlabel("Mutation Rate")
+    plt.savefig("mutation_{0}_nostack.png".format(test.lower()))
+
+def vary_mutation_perc(test,mutations,runs=5,width=.35):
     means = []
     errors = []
     fig, ax = plt.subplots()
@@ -77,14 +96,33 @@ def vary_mutation(test,mutations,runs=3):
         means.append(numpy.mean(avg_perc))
         errors.append(numpy.std(avg_perc))
     plt.bar(range(len(mutations)),means, width, color='r', yerr=errors)
-    ax.set_title("Accuracy (Percentage) vs. Mutation Rate ({0})".format(test.upper()))
+    ax.set_title("Performance vs. Mutation Rate ({0})".format(test.upper()))
     ax.set_xticks(range(len(mutations)))
-    ax.xticklabels(mutations)
-    ax.set_ylabel("Percentage")
+    ax.set_xticklabels(mutations)
+    ax.set_ylabel("Percentage %")
     ax.set_xlabel("Mutation Rate")
-    plt.savefig("mutation_{0}.png".format(test.lower()))
+    plt.savefig("mutation_{0}_perc.png".format(test.lower()))
 
-def vary_crossover(test,crossovers,runs=3):
+def vary_crossover(test,crossovers,runs=3,width=.35):
+    means = []
+    errors = []
+    fig, ax = plt.subplots()
+    for crossover in crossovers:
+        avg_perc = []
+        for run in range(runs):
+            _times, _mean, _max, _min, _best, _scores, best_perc = sampler(test,crossover=crossover)
+            avg_perc.append(len(_times))
+        means.append(numpy.mean(avg_perc))
+        errors.append(numpy.std(avg_perc))
+    plt.bar(range(len(crossovers)),means, width, color='r', yerr=errors)
+    ax.set_title("Convergence vs. Crossover Rate ({0})".format(test.upper()))
+    ax.set_xticks(range(len(crossovers)))
+    ax.set_xticklabels(crossovers)
+    ax.set_ylabel("Iterations")
+    ax.set_xlabel("Crossover Rate")
+    plt.savefig("crossover_{0}_nostack.png".format(test.lower()))
+
+def vary_crossover_perc(test,crossovers,runs=5,width=.35):
     means = []
     errors = []
     fig, ax = plt.subplots()
@@ -96,12 +134,12 @@ def vary_crossover(test,crossovers,runs=3):
         means.append(numpy.mean(avg_perc))
         errors.append(numpy.std(avg_perc))
     plt.bar(range(len(crossovers)),means, width, color='r', yerr=errors)
-    ax.set_title("Accuracy (Percentage) vs. Crossover Rate ({0})".format(test.upper()))
+    ax.set_title("Performance vs. Crossover Rate ({0})".format(test.upper()))
     ax.set_xticks(range(len(crossovers)))
     ax.set_xticklabels(crossovers)
-    ax.set_ylabel("Percentage")
+    ax.set_ylabel("Percentage %")
     ax.set_xlabel("Crossover Rate")
-    plt.savefig("crossover_{0}.png".format(test.lower()))
+    plt.savefig("crossover_{0}_perc.png".format(test.lower()))
 
 def percentage_bar(tests,runs=3,width=.35):
     string_size = []
@@ -165,7 +203,7 @@ def iter_bar(tests,runs=3,width=.35):
     ax.set_xticklabels(string_size)
     ax.set_ylabel("Average Iterations")
     ax.set_xlabel("RNA Length")
-    plt.savefig("time.png")
+    plt.savefig("iter.png")
 
 def compare_diagrams(test_image,true_image):
     f = plt.figure(figsize=(4,8))
@@ -183,16 +221,19 @@ def compare_diagrams(test_image,true_image):
     plt.savefig("comparison.png")
 
 def all_stats():
+    print "Running All Stats - Becareful,this will take forever..."
     tests = ["test6","test7","test4","test5"]
-    # for test in tests:
-    #     #scatter(test)
-    #     histogram(test)
+    for test in tests:
+        scatter(test)
+        histogram(test)
     percentage_bar(tests)
-    #time_bar(tests)
-    #iter_bar(tests)
-    #vary_mutation("test4", [0.01,0.05,0.1,0.15,0.2,0.3])
-    #vary_crossover("test4", [0.2,0.3,0.4,0.5,0.6,0.7,0.8])
-    # compare_diagrams("Test5Output_ss.ps","test5_true.png")
+    time_bar(tests)
+    iter_bar(tests)
+    vary_mutation("test7", [0.01,0.05,0.1,0.15,0.2,0.3,0.4,0.5,0.6,0.7])
+    vary_crossover("test7", [0.2,0.3,0.4,0.5,0.6,0.7,0.8])
+    vary_mutation_perc("test7", [0.01,0.05,0.1,0.15,0.2,0.3,0.4,0.5,0.6,0.7])
+    vary_crossover_perc("test7", [0.2,0.3,0.4,0.5,0.6,0.7,0.8])
+    compare_diagrams("Test5Output_ss.ps","test5_true.png")
 
 if __name__ == '__main__':
     all_stats()

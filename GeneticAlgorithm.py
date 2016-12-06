@@ -159,10 +159,10 @@ class GeneticAlgorithm(object):
             last_best = self.bestScore
         return self.bestScore, self.fittestChild
 
-def runit(test,crossover=0.7,mutation=0.1,iterations=600,unchanged=20,population=20,draw=False):
+def runit(test,crossover=0.7,mutation=0.1,iterations=600,unchanged=10,population=20,draw=False):
     testcase = test
     print("**PREDICTING RNA SECONDARY STRUCTURE**")
-    data = Data.Data("{0}.txt".format(testcase))
+    data = Data.Data("tests/{0}.txt".format(testcase))
     seq = data.getSequence()
     algorithm = GeneticAlgorithm(StructureDomain(seq),
                                  lambda x: -1.0*CostStructure(x),
