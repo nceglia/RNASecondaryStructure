@@ -1,5 +1,4 @@
 """
-Classes:
 Defining Secondary Structure Configuration
 """
 import numpy

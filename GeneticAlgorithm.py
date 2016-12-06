@@ -156,7 +156,7 @@ class GeneticAlgorithm(object):
             last_best = self.bestScore
         return self.bestScore, self.fittestChild
 
-def runit(test,crossover=0.7,mutation=0.1,iterations=600,unchanged=10,population=50,draw=False):
+def runit(test,crossover=0.7,mutation=0.1,iterations=600,unchanged=20,population=20,draw=False):
     testcase = test
     print("**PREDICTING RNA SECONDARY STRUCTURE**")
     data = Data.Data("{0}.txt".format(testcase))
@@ -185,7 +185,7 @@ if __name__ == '__main__':
     parser.add_argument('-m',type=float,dest='mutation',default=0.1)
     parser.add_argument('-c',type=float,dest='crossover',default=0.7)
     parser.add_argument('-i',type=int,dest='iterations',default=600)
-    parser.add_argument('-u',type=int,dest='unchanged',default=10)
+    parser.add_argument('-u',type=int,dest='unchanged',default=20)
     parser.add_argument('-p',type=int,dest='population',default=50)
     args = parser.parse_args()
     runit(args.test,args.crossover,args.mutation,args.iterations,args.unchanged,args.population,args.draw)
