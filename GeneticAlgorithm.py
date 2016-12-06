@@ -59,7 +59,10 @@ class GeneticAlgorithm(object):
         return scores
 
     def probability(self,scores):
-        norm = [1.0/(max(scores)-min(scores))*(float(x)-max(scores))+1.0 for x in scores]
+        try:
+            norm = [1.0/(max(scores)-min(scores))*(float(x)-max(scores))+1.0 for x in scores]
+        except ZeroDivisionError:
+            norm = [1.0 for _ in scores]
         e = numpy.exp(-numpy.array(norm) / 1.0)
         dist = e / numpy.sum(e)
         return dist

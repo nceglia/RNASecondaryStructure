@@ -187,11 +187,11 @@ def all_stats():
     # for test in tests:
     #     #scatter(test)
     #     histogram(test)
-    # percentage_bar(tests)
+    percentage_bar(tests)
     #time_bar(tests)
-    iter_bar(tests)
-    vary_mutation("test4", [0.01,0.05,0.1,0.15,0.2,0.3])
-    vary_crossover("test4", [0.2,0.3,0.4,0.5,0.6,0.7,0.8])
+    #iter_bar(tests)
+    #vary_mutation("test4", [0.01,0.05,0.1,0.15,0.2,0.3])
+    #vary_crossover("test4", [0.2,0.3,0.4,0.5,0.6,0.7,0.8])
     # compare_diagrams("Test5Output_ss.ps","test5_true.png")
 
 if __name__ == '__main__':
