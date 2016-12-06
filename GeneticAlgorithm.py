@@ -12,7 +12,7 @@ import time
 import argparse
 
 class GeneticAlgorithm(object):
-    def __init__(self,domain,fitness,crossover=0.5,mutation=0.1,popSize=100,maxIter=600,maxUnchanged=500,tol=0.00001):
+    def __init__(self,domain,fitness,crossover=0.5,mutation=0.1,popSize=50,maxIter=600,maxUnchanged=10,tol=0.00001):
         self.mutation = mutation
         self.crossover = crossover
         self.popSize = popSize
@@ -114,7 +114,7 @@ class GeneticAlgorithm(object):
             self.fittestChild = bestChild
         self.avgScore = numpy.mean(scores)
         print "Generation {2} Current Minimum: {0}, Average Score {1}".format(self.bestScore,self.avgScore,self.currentGeneration),
-        return self.bestScore,minScore, self.avgScore, max(scores)
+        return self.bestScore,minScore, self.avgScore, max(scores), scores
 
     def nextGeneration(self):
         nextPop = []
@@ -156,7 +156,7 @@ class GeneticAlgorithm(object):
             last_best = self.bestScore
         return self.bestScore, self.fittestChild
 
-def runit(test,crossover=0.7,mutation=0.1,iterations=600,unchanged=20,draw=False):
+def runit(test,crossover=0.7,mutation=0.1,iterations=600,unchanged=10,population=50,draw=False):
     testcase = test
     print("**PREDICTING RNA SECONDARY STRUCTURE**")
     data = Data.Data("{0}.txt".format(testcase))
@@ -166,6 +166,7 @@ def runit(test,crossover=0.7,mutation=0.1,iterations=600,unchanged=20,draw=False
                                  crossover=crossover,
                                  mutation=mutation,
                                  maxIter=iterations,
+                                 popSize=population,
                                  maxUnchanged=unchanged)
     bestScore, structure = algorithm.run()
     run_times = algorithm.run_times
@@ -184,6 +185,7 @@ if __name__ == '__main__':
     parser.add_argument('-m',type=float,dest='mutation',default=0.1)
     parser.add_argument('-c',type=float,dest='crossover',default=0.7)
     parser.add_argument('-i',type=int,dest='iterations',default=600)
-    parser.add_argument('-u',type=int,dest='unchanged',default=50)
+    parser.add_argument('-u',type=int,dest='unchanged',default=10)
+    parser.add_argument('-p',type=int,dest='population',default=50)
     args = parser.parse_args()
-    runit(args.test,args.crossover,args.mutation,args.iterations,args.unchanged,args.draw)
+    runit(args.test,args.crossover,args.mutation,args.iterations,args.unchanged,args.population,args.draw)
