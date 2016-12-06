@@ -33,7 +33,7 @@ def Penalty(structure):
             cost += count
     return cost
 
-def CostStructure(structure,weight=-50.0):
+def CostStructure(structure,weight=-10.0):
     basepairs = 0
     for row in structure:
         for item in row:

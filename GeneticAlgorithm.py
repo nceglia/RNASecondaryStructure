@@ -12,7 +12,7 @@ import time
 import argparse
 
 class GeneticAlgorithm(object):
-    def __init__(self,domain,fitness,crossover=0.5,mutation=0.2,popSize=20,maxIter=600,maxUnchanged=25,tol=0.00001):
+    def __init__(self,domain,fitness,crossover=0.5,mutation=0.1,popSize=100,maxIter=600,maxUnchanged=500,tol=0.00001):
         self.mutation = mutation
         self.crossover = crossover
         self.popSize = popSize
@@ -110,9 +110,11 @@ class GeneticAlgorithm(object):
         minScore = min(scores)
         if minScore <= self.bestScore:
             self.bestScore = minScore
-            self.fittestChild = self.population[numpy.argmin(scores)]
+            bestChild = self.population[numpy.argmin(scores)]
+            self.fittestChild = bestChild
         self.avgScore = numpy.mean(scores)
         print "Generation {2} Current Minimum: {0}, Average Score {1}".format(self.bestScore,self.avgScore,self.currentGeneration),
+        return self.bestScore,self.minScore, self.avgScore, max(scores)
 
     def nextGeneration(self):
         nextPop = []
@@ -131,6 +133,7 @@ class GeneticAlgorithm(object):
         self.population = nextPop
 
     def run(self):
+        self.run_times = []
         print("Initializing Population...")
         start_time = time.time()
         self.initialPopulation()
@@ -138,34 +141,49 @@ class GeneticAlgorithm(object):
         print "\t\tElapsed Time: ",time.time() - start_time, "Seconds"
         last_best = self.bestScore
         self.contig = 0
+        self.score_watch = []
         while not self.stop():
             start_time = time.time()
             self.nextGeneration()
-            self.evaluate()
+            self.score_watch.append(self.evaluate())
             if last_best - self.bestScore < self.tol:
                 self.contig += 1
             else:
                 self.contig = 0
-            print "\t\tElapsed Time: ",time.time() - start_time, "Seconds"
+            elapsed = time.time() - start_time
+            print "\t\tElapsed Time: ",elapsed, "Seconds"
+            self.run_times.append(elapsed)
             last_best = self.bestScore
         return self.bestScore, self.fittestChild
 
-def main():
-    parser = argparse.ArgumentParser(description='Process some integers.')
-    parser.add_argument('-t', dest='test', type=str, help='Test Case to Run')
-    parser.add_argument('-d', dest='draw',help='Draw structure',action='store_true')
-    args = parser.parse_args()
+def runit(test,crossover=0.7,mutation=0.1,iterations=600,unchanged=50,draw=False):
     testcase = args.test
     print("**PREDICTING RNA SECONDARY STRUCTURE**")
     data = Data.Data("{0}.txt".format(testcase))
     seq = data.getSequence()
-    algorithm = GeneticAlgorithm(StructureDomain(seq),lambda x: -1.0*CostStructure(x))
+    algorithm = GeneticAlgorithm(StructureDomain(seq),
+                                 lambda x: -1.0*CostStructure(x),
+                                 crossover=args.crossover,
+                                 mutation=args.mutation,
+                                 maxIter=args.iterations,
+                                 maxUnchanged=args.unchanged)
     bestScore, structure = algorithm.run()
+    run_times = algorithm.run_times
+    score_watch = algorith.score_watch
     print("Optimization Complete!")
-    data.testStructure(structure)
-    if args.draw:
-        data.drawDotBracket(structure,"{0}Output".format(testcase.capitalize()))
+    best_perc = data.testStructure(structure)
+    if draw:
+        data.drawDotBracket(structure,"{0}_{1}_Output".format(testcase.capitalize(),i))
+    return run_times, score_watch, best_perc
 
 
 if __name__ == '__main__':
-    main()
+    parser = argparse.ArgumentParser(description='Process some integers.')
+    parser.add_argument('-t', dest='test', type=str, help='Test Case to Run')
+    parser.add_argument('-d', dest='draw',help='Draw structure',action='store_true')
+    parser.add_argument('-m',type=float,dest='mutation',default=0.1)
+    parser.add_argument('-c',type=float,dest='crossover',default=0.7)
+    parser.add_argument('-i',type=int,dest='iterations',default=600)
+    parser.add_argument('-u',type=int,dest='unchanged',default=50)
+    args = parser.parse_args()
+    runit(args.test,args.crossover,args.mutation,args.iterations,args.unchanged,args.draw)

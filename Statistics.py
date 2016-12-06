@@ -4,9 +4,31 @@ Basic:
 Min/Max/Mean per Generation
 Histogram of Score per Generation
 """
+import matplotlib
+matplotlib.use('Agg')
+import matplotlib.pyplot as plt
+from GeneticAlgorithm import runit
 
-def min_max_mean():
-    return
+def table(values)
+
+def sampler(test,runs=10):
+    _mean = []
+    _max = []
+    _min = []
+    _best = []
+    _times = []
+    for _ in xrange(runs):
+        run_times, score_watch, best_perc = runit(test)
+        for run_time, scores in zip(run_times,score_watch):
+            _times.append(run_time)
+            _mean.append(scores[2])
+            _max.append(scores[3])
+            _min.append(scores[1])
+            _best.append(scores[0])
+    return _times, _mean, _max, _min, _best
+
+def scatter(test,runs,prefix):
+    _times, _mean, _max, _min, _best = sampler(test,runs)
 
 def score_histogram():
     return

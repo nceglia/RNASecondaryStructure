@@ -42,20 +42,24 @@ class Data(object):
     def testStructure(self,structure):
         if self.testType == "pairs":
             results = self.pairing(structure)
+            best_scores = []
             print "Returned Pairs: ", " ".join(map(str,results))
             for i, solution in enumerate(self.solutions):
                 hits = 0
                 for pair in results:
                     if pair in solution:
                         hits+=1
-                if hits == len(solution):
-                    print "{0}% Matched with Solution {1}".format(float(hits)/len(solution)*100.0,i)
+                best_scores.append(float(hits)/len(solution))
+                print "{0}% Matched with Solution {1}".format(float(hits)/len(solution)*100.0,i)
+            best_score = max(best_scores)
         elif self.testType == "dotbracket":
             dotbracket = self.convertDotBracket(structure)
             print "Returned DotBracket {0}".format(dotbracket)
             for i, solution in enumerate(self.solutions):
                 perc = difflib.SequenceMatcher(None,dotbracket,str(solution))
                 print "{0}% Matched with Solution {1}".format(float(perc.ratio())*100.0,i)
+            best_score = perc.ratio()
+        return best_score
 
     def convertDotBracket(self,structure):
         dotbracket = ["." for _ in self.sequence]
