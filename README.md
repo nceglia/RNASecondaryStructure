@@ -1,8 +1,8 @@
 
-#Predicting RNA Secondary Structure by Genetic Algorithm.
-##Modified Nussinov Algorithm
+# Predicting RNA Secondary Structure by Genetic Algorithm.
+## Modified Nussinov Algorithm
 
-##Classes
+## Classes
 * GeneticAlgorithm
 * RNA
 * Statistics
