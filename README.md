@@ -8,7 +8,7 @@
 * Statistics
 * Data
 
-##Command Line
+## Command Line
 Basic Usage:
 ~~~~
 python GeneticAlgorithm.py --help
@@ -30,7 +30,7 @@ Gathering Statistics Usage (Plot Mean/Max/Min Scores for each Generation)
 python Statistics.py --scatter
 ~~~~
 
-##References
+## References
 [1] Nussinov, Ruth, and Ann B. Jacobson. "Fast algorithm for predicting the secondary structure of single-stranded RNA." Proceedings of the National Academy of Sciences 77.11 (1980): 6309-6313.
 
 [2] Belegundu, A. D., and T. R. Chandrupatla. "Optimization concepts and applications in engineering. 1999."
